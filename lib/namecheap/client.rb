@@ -6,8 +6,12 @@ module Namecheap
     include HTTParty
     base_uri 'https://api.sandbox.namecheap.com/xml.response'
 
-    def initialize(api_username, api_key)
+    class NamecheapApiException < StandardError
+    end
+
+    def initialize(api_username, api_key, api_url=nil)
       @auth = { :api_username => api_username, :api_key => api_key }
+      base_uri(api_url) if api_url
     end
 
     def get_domains
@@ -104,7 +108,11 @@ module Namecheap
     private
     def api_call(method_name, parameters)
       query = "?" + to_param(compile_args(parameters.merge :Command => method_name))
-      self.class.get(query)
+      result = self.class.get(query)
+      if result.parsed_response['ApiResponse']['Errors'].count > 0
+        err = result.parsed_response['ApiResponse']['Errors'].first[1]
+        raise NamecheapApiException, "Namecheap API Error: code=#{err['Number']} msg=#{err['__content__']}"
+      end
     end
 
     def compile_args(args = {})
