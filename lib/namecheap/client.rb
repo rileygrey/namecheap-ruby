@@ -21,7 +21,7 @@ module Namecheap
     end
 
     def purchase_domain(domain_name, years, contact_hash)
-      result = api_call('namecheap.domains.create', {
+      h = {
         :DomainName => domain_name,
         :Years => years,
         :RegistrantFirstName => contact_hash[:first_name],
@@ -64,7 +64,12 @@ module Namecheap
         :AuxBillingCountry => contact_hash[:country],
         :AuxBillingPhone => contact_hash[:phone],
         :AuxBillingEmailAddress => contact_hash[:email],
-      })
+      }
+      if domain_name.end_with?('.us')
+        h[:RegistrantNexus] = 'C21'
+        h[:RegistrantPurpose] = 'P1'
+      end
+      result = api_call('namecheap.domains.create', h)
     end
 
     def configure_dns_records(domain_name, dns_array)
