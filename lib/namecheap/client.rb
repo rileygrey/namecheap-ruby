@@ -5,6 +5,7 @@ module Namecheap
   class Client
     include HTTParty
     base_uri 'https://api.sandbox.namecheap.com/xml.response'
+    #debug_output $stdout
 
     class NamecheapApiException < StandardError
     end
@@ -103,9 +104,9 @@ module Namecheap
       domains = {}
       if domain_name_or_array.is_a?(String)
         result = result.parsed_response['ApiResponse']['CommandResponse']['DomainCheckResult']
-        domains[result['Domain']] = (result['Available']=='true')
+        domains[result['Domain']] = (result['Available'].downcase=='true')
       else
-        result.parsed_response['ApiResponse']['CommandResponse']['DomainCheckResult'].each{|h| domains[h['Domain']] = (h['Available']=='true')}
+        result.parsed_response['ApiResponse']['CommandResponse']['DomainCheckResult'].each{|h| domains[h['Domain']] = (h['Available'].downcase=='true')}
       end
       domains
     end
