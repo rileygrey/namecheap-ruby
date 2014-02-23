@@ -88,14 +88,18 @@ module Namecheap
       result.parsed_response['ApiResponse']['Errors'].nil?
     end
 
-    def configure_nameservers(domain_name, nameserver_array)
+    def configure_nameservers(domain_name, nameserver_array=[])
       domain_parts = domain_name.split(".")
       hash = {
         :SLD => domain_parts[0], # mywebsite
         :TLD => domain_parts[1], # com
       }
-      hash['Nameservers'] = nameserver_array.join(",")
-      result = api_call('namecheap.domains.dns.setCustom', hash)
+      if nameserver_array.empty?
+        result = api_call('namecheap.domains.dns.setDefault', hash)
+      else
+        hash['Nameservers'] = nameserver_array.join(",")
+        result = api_call('namecheap.domains.dns.setCustom', hash)
+      end
       result.parsed_response['ApiResponse']['Errors'].nil?
     end
 
